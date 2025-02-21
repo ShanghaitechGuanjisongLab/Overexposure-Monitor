@@ -51,7 +51,7 @@ inline static void 单级查找(HWND& 父窗口, std::ostringstream& 错误信�
 	if (!(父窗口 = FindWindowExA(父窗口, NULL, 窗口类, NULL)))
 		throw& 错误信息流;
 }
-static void 指针末端(HWND& 窗口句柄, std::ostringstream& 错误信息流,RECT&窗口矩形)
+static void 指针末端(HWND& 窗口句柄, std::ostringstream& 错误信息流, RECT& 窗口矩形)
 {
 	try
 	{
@@ -193,8 +193,6 @@ int main(int argc, char* argv[])
 			DWORD 状态码;
 			DWORD 字节数 = sizeof(状态码);
 			HttpQueryInfo(连接, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, &状态码, &字节数, NULL);
-			time_t const 当前时间 = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-			std::cout << std::put_time(localtime(&当前时间), "%Y-%m-%d %H:%M:%S ");
 			if (状态码 == HTTP_STATUS_OK)
 			{
 				static std::string 缓冲;
