@@ -74,27 +74,6 @@ static auto 输出当前时间()
 }
 int main(int argc, char* argv[])
 {
-	{
-        static HINTERNET const 代理 = InternetOpenW(L"", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);
-        HINTERNET const 连接 = InternetOpenUrlW(代理, L"https://tieba.baidu.com/", NULL, 0, INTERNET_FLAG_RELOAD, 0);
-		static std::string 缓冲;
-		DWORD 字节数;
-		bool 需要扩张;
-		auto const 更新方法 = [连接, &字节数, &需要扩张](char* 指针, size_t 容量)
-			{
-				需要扩张 = !InternetReadFile(连接, 指针 + 缓冲.size(), 容量 - 缓冲.size(), &字节数);
-				return 缓冲.size() + 字节数;
-			};
-		缓冲.resize_and_overwrite(std::max<size_t>(32, 缓冲.capacity()), 更新方法);
-		for (;;)
-			if (需要扩张)
-				缓冲.resize_and_overwrite(缓冲.capacity() << 1, 更新方法);
-			else if (字节数)
-				缓冲.resize_and_overwrite(缓冲.capacity(), 更新方法);
-			else
-				break;
-		std::cout <<  缓冲 << std::endl;
-	}
 	std::ostringstream 错误信息流{ 转当前代码页(L"找不到窗口："),std::ios::app };
 	错误信息流 << "SWT_Window0::OLYMPUS FV31S - SW";
 	HWND 父窗口 = FindWindowW(L"SWT_Window0", L"OLYMPUS FV31S-SW");
@@ -220,10 +199,12 @@ int main(int argc, char* argv[])
 			{
 				static std::string 缓冲;
 				bool 需要扩张;
-				auto const 更新方法 = [连接, &字节数, &需要扩张](char* 指针, size_t 容量)
+				DWORD 已写字节数 = 0;
+				auto const 更新方法 = [连接, &字节数, &需要扩张, &已写字节数](char* 指针, size_t 容量)
 					{
-						需要扩张 = !InternetReadFile(连接, 指针 + 缓冲.size(), 容量 - 缓冲.size(), &字节数);
-						return 缓冲.size() + 字节数;
+						//MSVC的bug，size会在调用用户方法之前被修改，因此访问不到原本的size
+						需要扩张 = !InternetReadFile(连接, 指针 + 已写字节数, 容量 - 已写字节数, &字节数);
+						return 已写字节数 += 字节数;
 					};
 				缓冲.resize_and_overwrite(std::max<size_t>(1, 缓冲.capacity()), 更新方法);
 				for (;;)
