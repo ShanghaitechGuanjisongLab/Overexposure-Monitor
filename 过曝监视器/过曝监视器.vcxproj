@@ -74,11 +74,13 @@
     <linkage-MKL-static-win-x64>static</linkage-MKL-static-win-x64>
     <threading-MKL-static-win-x64>intel</threading-MKL-static-win-x64>
     <interface-MKL-static-win-x64>lp64</interface-MKL-static-win-x64>
+    <OutDir>\\双光子主机\e\张天夫\过曝监视器\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <linkage-MKL-static-win-x64>static</linkage-MKL-static-win-x64>
     <threading-MKL-static-win-x64>intel</threading-MKL-static-win-x64>
     <interface-MKL-static-win-x64>lp64</interface-MKL-static-win-x64>
+    <OutDir>\\双光子主机\e\张天夫\过曝监视器\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -170,21 +172,11 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\Eigen3.3.3.9\build\native\Eigen3.targets" Condition="Exists('..\packages\Eigen3.3.3.9\build\native\Eigen3.targets')" />
-    <Import Project="..\packages\inteltbb.redist.win.2022.0.0.396\build\native\inteltbb.redist.win.targets" Condition="Exists('..\packages\inteltbb.redist.win.2022.0.0.396\build\native\inteltbb.redist.win.targets')" />
-    <Import Project="..\packages\inteltbb.devel.win.2022.0.0.396\build\native\inteltbb.devel.win.targets" Condition="Exists('..\packages\inteltbb.devel.win.2022.0.0.396\build\native\inteltbb.devel.win.targets')" />
-    <Import Project="..\packages\intelmkl.static.win-x64.2025.0.1.5\build\native\intelmkl.static.win-x64.targets" Condition="Exists('..\packages\intelmkl.static.win-x64.2025.0.1.5\build\native\intelmkl.static.win-x64.targets')" />
-    <Import Project="..\packages\intelopenmp.redist.win.2025.0.4.1521\build\native\intelopenmp.redist.win.targets" Condition="Exists('..\packages\intelopenmp.redist.win.2025.0.4.1521\build\native\intelopenmp.redist.win.targets')" />
-    <Import Project="..\packages\intelopenmp.devel.win.2025.0.4.1521\build\native\intelopenmp.devel.win.targets" Condition="Exists('..\packages\intelopenmp.devel.win.2025.0.4.1521\build\native\intelopenmp.devel.win.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。使用“NuGet 程序包还原”可下载这些程序包。有关更多信息，请参见 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Eigen3.3.3.9\build\native\Eigen3.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Eigen3.3.3.9\build\native\Eigen3.targets'))" />
-    <Error Condition="!Exists('..\packages\inteltbb.redist.win.2022.0.0.396\build\native\inteltbb.redist.win.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\inteltbb.redist.win.2022.0.0.396\build\native\inteltbb.redist.win.targets'))" />
-    <Error Condition="!Exists('..\packages\inteltbb.devel.win.2022.0.0.396\build\native\inteltbb.devel.win.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\inteltbb.devel.win.2022.0.0.396\build\native\inteltbb.devel.win.targets'))" />
-    <Error Condition="!Exists('..\packages\intelmkl.static.win-x64.2025.0.1.5\build\native\intelmkl.static.win-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\intelmkl.static.win-x64.2025.0.1.5\build\native\intelmkl.static.win-x64.targets'))" />
-    <Error Condition="!Exists('..\packages\intelopenmp.redist.win.2025.0.4.1521\build\native\intelopenmp.redist.win.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\intelopenmp.redist.win.2025.0.4.1521\build\native\intelopenmp.redist.win.targets'))" />
-    <Error Condition="!Exists('..\packages\intelopenmp.devel.win.2025.0.4.1521\build\native\intelopenmp.devel.win.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\intelopenmp.devel.win.2025.0.4.1521\build\native\intelopenmp.devel.win.targets'))" />
   </Target>
 </Project>

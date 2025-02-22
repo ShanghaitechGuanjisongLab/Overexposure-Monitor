@@ -1,16 +1,10 @@
-﻿#define EIGEN_USE_MKL_ALL
-#include <Eigen/Core>
+﻿#include <Eigen/Core>
 #include <windows.h>
 #include <wininet.h>
 #pragma comment(lib,"Wininet.lib")
+#include <conio.h>
 #undef max
 import std;
-[[noreturn]] static void 普通报错(std::string const& 错误信息)
-{
-	std::cerr << 错误信息 << std::endl;
-	system("pause");
-	exit(1);
-}
 template<size_t 长度>
 static std::string 转当前代码页(wchar_t const(&宽字符串)[长度])//引用数组参数可以避免退化成指针
 {
@@ -21,6 +15,19 @@ static std::string 转当前代码页(wchar_t const(&宽字符串)[长度])//引
 			return WideCharToMultiByte(CP_ACP, 0, 宽字符串, 字符数, 指针, 容量, NULL, NULL);
 		});
 	return 当前代码页;
+}
+inline static void 清空输入缓冲()
+{
+	while (kbhit())
+		getch();
+}
+[[noreturn]] static void 普通报错(std::string const& 错误信息)
+{
+	std::cerr << 错误信息 << std::endl;
+	std::cout << 转当前代码页(L"按任意键关闭程序：");
+	清空输入缓冲();
+	getch();
+	exit(1);
 }
 template<size_t 长度>
 inline static void 普通报错(wchar_t const(&宽字符串)[长度])
@@ -67,10 +74,22 @@ static void 指针末端(HWND& 窗口句柄, std::ostringstream& 错误信息流
 	if (!GetWindowRect(窗口句柄, &窗口矩形) || WindowFromPoint({ (窗口矩形.left + 窗口矩形.right) / 2,(窗口矩形.top + 窗口矩形.bottom) / 2 }) != 窗口句柄)
 		窗口句柄 = NULL;
 }
-static auto 输出当前时间()
+inline static auto 输出当前时间()
 {
 	time_t const 当前时间 = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	return std::put_time(localtime(&当前时间), "%Y-%m-%d %H:%M:%S ");
+	return std::put_time(localtime(&当前时间), "%H:%M:%S ");
+}
+using namespace std::chrono_literals;
+static void 错误等待输入(uint16_t& 错误等待)
+{
+	清空输入缓冲();
+	错误等待 <<= 1;
+	for (uint16_t a = 0; a < 错误等待; ++a)
+	{
+		std::this_thread::sleep_for(1s);
+		if (kbhit())
+			break;
+	}
 }
 int main(int argc, char* argv[])
 {
@@ -100,7 +119,7 @@ int main(int argc, char* argv[])
 	}
 	错误信息流 << "\\SWT_Window0[";
 	std::string const 错误前缀 = 错误信息流.str();
-	std::chrono::seconds 错误等待{ 1 };
+	uint16_t 错误等待 = 1;
 	unsigned long 警报阈值;
 	if (argc > 1)
 	{
@@ -112,7 +131,8 @@ int main(int argc, char* argv[])
 	else
 	{
 		std::cout << 转当前代码页(L"输入警报阈值（0~255）：");
-		std::cin >> 警报阈值;
+		if(!(std::cin >> 警报阈值))
+			普通报错(L"无法将输入解析为数字");
 		if (警报阈值 > std::numeric_limits<uint8_t>::max())
 			普通报错(L"警报阈值不能大于255");
 	}
@@ -140,7 +160,7 @@ int main(int argc, char* argv[])
 		if (!指针窗口)
 		{
 			std::cerr << 输出当前时间() << Tile错误信息流.str() << std::endl;
-			std::this_thread::sleep_for(错误等待 *= 2);
+			错误等待输入(错误等待);
 			continue;
 		}
 		HWND 末端窗口 = 指针窗口;
@@ -159,7 +179,7 @@ int main(int argc, char* argv[])
 			}
 			static std::string const 遮挡提示 = 转当前代码页(L"请检查成像预览窗口是否被遮挡？");
 			std::cerr << std::endl << 输出当前时间() << std::endl << Tile错误信息流.str() << std::endl << Single错误信息流.str() << std::endl << 遮挡提示 << std::endl;
-			std::this_thread::sleep_for(错误等待 *= 2);
+			错误等待输入(错误等待);
 			continue;
 		}
 	成功获取窗口:
@@ -206,12 +226,21 @@ int main(int argc, char* argv[])
 					};
 				缓冲.resize_and_overwrite(std::max<size_t>(1, 缓冲.capacity()), 更新方法);
 				for (;;)
-					if (需要扩张)
+					if (需要扩张 || 已写字节数 == 缓冲.capacity())
 						缓冲.resize_and_overwrite(缓冲.capacity() << 1, 更新方法);
 					else if (字节数)
 						缓冲.resize_and_overwrite(缓冲.capacity(), 更新方法);
 					else
 						break;
+				static std::wstring 宽字符串;
+				宽字符串.resize_and_overwrite(缓冲.size(), [](wchar_t* 指针, size_t 容量)
+					{
+						return MultiByteToWideChar(CP_UTF8, 0, 缓冲.c_str(), 缓冲.size(), 指针, 容量);
+					});
+				缓冲.resize_and_overwrite(缓冲.size(), [](char* 指针, size_t 容量)
+					{
+						return WideCharToMultiByte(CP_ACP, 0, 宽字符串.c_str(), 宽字符串.size(), 指针, 容量, NULL, NULL);
+					});
 				static std::string const 警报成功 = 转当前代码页(L"检测到过曝，已发送警报：");
 				std::cout << 警报成功 << 缓冲 << std::endl;
 			}
@@ -222,10 +251,11 @@ int main(int argc, char* argv[])
 			}
 			InternetCloseHandle(连接);
 			static std::string const 任意键继续 = 转当前代码页(L"按任意键以继续监视：");
-			std::cout << 任意键继续;
-			std::cin.get(); // 等待用户按任意键
+			std::cout << 任意键继续 << std::endl;
+			清空输入缓冲();
+			getch();
 		}
-		using namespace std::chrono_literals;
-		std::this_thread::sleep_for(错误等待 = 1s);
+		错误等待 = 1;
+		std::this_thread::sleep_for(1s);
 	}
 }
