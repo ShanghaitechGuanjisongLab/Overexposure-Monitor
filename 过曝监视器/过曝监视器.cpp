@@ -103,10 +103,38 @@ int main(int argc, char* argv[])
 		平级查找(4, 父窗口, 错误信息流);
 		单级查找(父窗口, 错误信息流, "SWT_Window0");
 		单级查找(父窗口, 错误信息流, "SWT_Window0");
+	}
+	catch (std::ostringstream*)
+	{
+		普通报错(错误信息流.str());
+	}
+	HWND const 分支点父窗口 = 父窗口;
+	std::string const 分支点错误信息 = 错误信息流.str();
+	try
+	{
 		平级查找(8, 父窗口, 错误信息流);
 		单级查找(父窗口, 错误信息流, "SWT_Window0");
 		单级查找(父窗口, 错误信息流, "SWT_Window0");
 		平级查找(2, 父窗口, 错误信息流);
+	}
+	catch (std::ostringstream*)
+	{
+		父窗口 = 分支点父窗口;
+		错误信息流 = std::ostringstream{ 分支点错误信息,std::ios::app };
+		try
+		{
+			平级查找(10, 父窗口, 错误信息流);
+			单级查找(父窗口, 错误信息流, "SWT_Window0");
+			单级查找(父窗口, 错误信息流, "SWT_Window0");
+			平级查找(2, 父窗口, 错误信息流);
+		}
+		catch (std::ostringstream*)
+		{
+			普通报错(错误信息流.str());
+		}
+	}
+	try
+	{
 		平级查找(2, 父窗口, 错误信息流);
 		单级查找(父窗口, 错误信息流, "SWT_Window0");
 		单级查找(父窗口, 错误信息流, "SWT_Window0");
