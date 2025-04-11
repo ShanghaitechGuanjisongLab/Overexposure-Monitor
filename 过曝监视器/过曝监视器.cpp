@@ -1,4 +1,5 @@
 ﻿#include <Eigen/Core>
+#include <webp/encode.h>
 #include <windows.h>
 #include <wininet.h>
 #pragma comment(lib,"Wininet.lib")
@@ -229,6 +230,12 @@ int main(int argc, char* argv[])
 			} };
 		Eigen::Matrix<uint8_t, Eigen::Dynamic, 1>像素数组(位图.bmWidthBytes * 位图.bmHeight);
 		GetDIBits(内存设备上下文, 位图句柄, 0, 位图.bmHeight, 像素数组.data(), &位图信息, DIB_RGB_COLORS);
+#ifdef _DEBUG
+		uint8_t* WEBP;
+		static uint16_t 编号 = 0;
+		std::ofstream("D:\\过曝监视器\\" + std::to_string(编号++) + ".webp", std::ios::binary).write(reinterpret_cast<char*>(WEBP), WebPEncodeLosslessRGB(像素数组.data(), 位图.bmWidth, 位图.bmHeight, 位图.bmWidthBytes, &WEBP));
+		WebPFree(WEBP);
+#endif
 		DeleteDC(内存设备上下文);
 		DeleteObject(位图句柄);
 		uint16_t const 当前亮度 = 像素数组.cast<uint32_t>().mean();
