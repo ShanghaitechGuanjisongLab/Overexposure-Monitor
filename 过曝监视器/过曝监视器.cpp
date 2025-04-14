@@ -40,23 +40,21 @@ static void 平级查找(uint16_t 第几个, HWND& 窗口句柄, std::ostringstr
 {
 	错误信息流 << "\\SWT_Window0[";
 	std::string const 错误信息 = 错误信息流.str();
-	HWND const 父窗口 = 窗口句柄;
+	HWND const 父窗口A = 窗口句柄;
 	窗口句柄 = NULL;
 	for (uint16_t a = 0; a < 第几个; ++a)
-	{
-		if (!(窗口句柄 = FindWindowExW(父窗口, 窗口句柄, L"SWT_Window0", NULL)))
+		if (!(窗口句柄 = FindWindowExW(父窗口A, 窗口句柄, L"SWT_Window0", NULL)))
 		{
 			错误信息流 << a << "]";
 			throw& 错误信息流;
 		}
-	}
 	错误信息流 << 第几个 - 1 << "]";
 }
 //向下挖一级
-inline static void 单级查找(HWND& 父窗口, std::ostringstream& 错误信息流, char const* 窗口类)
+inline static void 单级查找(HWND& 父窗口A, std::ostringstream& 错误信息流, char const* 窗口类)
 {
 	错误信息流 << "\\" << 窗口类;
-	if (!(父窗口 = FindWindowExA(父窗口, NULL, 窗口类, NULL)))
+	if (!(父窗口A = FindWindowExA(父窗口A, NULL, 窗口类, NULL)))
 		throw& 错误信息流;
 }
 static void 指针末端(HWND& 窗口句柄, std::ostringstream& 错误信息流, RECT& 窗口矩形)
@@ -96,51 +94,55 @@ int main(int argc, char* argv[])
 {
 	std::ostringstream 错误信息流{ 转当前代码页(L"找不到窗口："),std::ios::app };
 	错误信息流 << "SWT_Window0::OLYMPUS FV31S - SW";
-	HWND 父窗口 = FindWindowW(L"SWT_Window0", L"OLYMPUS FV31S-SW");
-	if (!父窗口)
+	HWND 父窗口A = FindWindowW(L"SWT_Window0", L"OLYMPUS FV31S-SW");
+	if (!父窗口A)
 		普通报错(错误信息流.str());
 	try
 	{
-		平级查找(4, 父窗口, 错误信息流);
-		单级查找(父窗口, 错误信息流, "SWT_Window0");
-		单级查找(父窗口, 错误信息流, "SWT_Window0");
+		平级查找(4, 父窗口A, 错误信息流);
+		单级查找(父窗口A, 错误信息流, "SWT_Window0");
+		单级查找(父窗口A, 错误信息流, "SWT_Window0");
 	}
 	catch (std::ostringstream*)
 	{
 		普通报错(错误信息流.str());
 	}
-	HWND const 分支点父窗口 = 父窗口;
-	std::string const 分支点错误信息 = 错误信息流.str();
-	try
-	{
-		平级查找(8, 父窗口, 错误信息流);
-		单级查找(父窗口, 错误信息流, "SWT_Window0");
-		单级查找(父窗口, 错误信息流, "SWT_Window0");
-		平级查找(2, 父窗口, 错误信息流);
-	}
-	catch (std::ostringstream*)
-	{
-		父窗口 = 分支点父窗口;
-		错误信息流 = std::ostringstream{ 分支点错误信息,std::ios::app };
-		try
+	//这个分支下，正确的窗口编号是不确定的，需要逐一扫描
+	错误信息流 << "\\SWT_Window0";
+	HWND 指针窗口 = NULL;
+	for (uint16_t a = 0; a < 7; ++a)
+		if (!(指针窗口 = FindWindowExW(父窗口A, 指针窗口, L"SWT_Window0", NULL)))
 		{
-			平级查找(10, 父窗口, 错误信息流);
-			单级查找(父窗口, 错误信息流, "SWT_Window0");
-			单级查找(父窗口, 错误信息流, "SWT_Window0");
-			平级查找(2, 父窗口, 错误信息流);
-		}
-		catch (std::ostringstream*)
-		{
+			错误信息流 << '[' << a << "]";
 			普通报错(错误信息流.str());
 		}
+	for (uint16_t a = 7; a < 10; ++a)
+	{
+		if (!(指针窗口 = FindWindowExW(父窗口A, 指针窗口, L"SWT_Window0", NULL)))
+		{
+			错误信息流 << '[' << a << "]";
+			普通报错(错误信息流.str());
+		}
+		HWND 子窗口 = FindWindowExW(指针窗口, NULL, L"SWT_Window0", NULL);
+		if (!子窗口)
+			continue;
+		HWND const 父窗口B = FindWindowExW(子窗口, NULL, L"SWT_Window0", NULL);
+		if (!(父窗口B && (子窗口 = FindWindowExW(父窗口B, NULL, L"SWT_Window0", NULL)) && (子窗口 = FindWindowExW(父窗口B, 子窗口, L"SWT_Window0", NULL))))
+			continue;
+		错误信息流 << '[' << a << "]\\SWT_Window0\\SWT_Window0\\SWT_Window0[1]";
+		父窗口A = 子窗口;
+		goto 找到正确分支;
 	}
+	错误信息流 << "：找不到正确分支";
+	普通报错(错误信息流.str());
+找到正确分支:
 	try
 	{
-		平级查找(2, 父窗口, 错误信息流);
-		单级查找(父窗口, 错误信息流, "SWT_Window0");
-		单级查找(父窗口, 错误信息流, "SWT_Window0");
-		平级查找(2, 父窗口, 错误信息流);
-		单级查找(父窗口, 错误信息流, "SWT_Window0");
+		平级查找(2, 父窗口A, 错误信息流);
+		单级查找(父窗口A, 错误信息流, "SWT_Window0");
+		单级查找(父窗口A, 错误信息流, "SWT_Window0");
+		平级查找(2, 父窗口A, 错误信息流);
+		单级查找(父窗口A, 错误信息流, "SWT_Window0");
 	}
 	catch (std::ostringstream*)
 	{
@@ -185,7 +187,7 @@ int main(int argc, char* argv[])
 	{
 		std::ostringstream Tile错误信息流{ 错误前缀,std::ios::app };
 		Tile错误信息流 << "0]";
-		HWND const 指针窗口 = FindWindowExA(父窗口, NULL, "SWT_Window0", NULL);
+		指针窗口 = FindWindowExA(父窗口A, NULL, "SWT_Window0", NULL);
 		if (!指针窗口)
 		{
 			std::cerr << 输出当前时间() << Tile错误信息流.str() << std::endl;
@@ -197,7 +199,7 @@ int main(int argc, char* argv[])
 		指针末端(末端窗口, Tile错误信息流, 窗口矩形);
 		if (!末端窗口)
 		{
-			末端窗口 = FindWindowExA(父窗口, 指针窗口, "SWT_Window0", NULL);
+			末端窗口 = FindWindowExA(父窗口A, 指针窗口, "SWT_Window0", NULL);
 			std::ostringstream Single错误信息流{ 错误前缀,std::ios::app };
 			Single错误信息流 << "1]";
 			if (末端窗口)
