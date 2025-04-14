@@ -212,32 +212,27 @@ int main(int argc, char* argv[])
 			continue;
 		}
 	成功获取窗口:
-		HDC const 窗口设备上下文 = GetDC(末端窗口);
-		HBITMAP const 位图句柄 = CreateCompatibleBitmap(窗口设备上下文, 窗口矩形.right - 窗口矩形.left, 窗口矩形.bottom - 窗口矩形.top);
+		HDC const 窗口设备上下文 = GetDC(NULL);
+		LONG const 窗口宽度 = 窗口矩形.right - 窗口矩形.left;
+		LONG const 窗口高度 = 窗口矩形.bottom - 窗口矩形.top;
+		HBITMAP const 位图句柄 = CreateCompatibleBitmap(窗口设备上下文, 窗口宽度, 窗口高度);
 		HDC const 内存设备上下文 = CreateCompatibleDC(窗口设备上下文);
 		SelectObject(内存设备上下文, 位图句柄);
-		BitBlt(内存设备上下文, 0, 0, 窗口矩形.right - 窗口矩形.left, 窗口矩形.bottom - 窗口矩形.top, 窗口设备上下文, 0, 0, SRCCOPY);
+		BitBlt(内存设备上下文, 0, 0, 窗口宽度, 窗口高度, 窗口设备上下文, 窗口矩形.left, 窗口矩形.top, SRCCOPY);
 		ReleaseDC(末端窗口, 窗口设备上下文);
-		BITMAP 位图;
-		GetObject(位图句柄, sizeof(位图), &位图);
 		BITMAPINFO 位图信息 = { {
 				.biSize = sizeof(BITMAPINFOHEADER),
-				.biWidth = 位图.bmWidth,
-				.biHeight = 位图.bmHeight,
+				.biWidth = 窗口宽度,
+				.biHeight = 窗口高度,
 				.biPlanes = 1,
-				.biBitCount = 位图.bmBitsPixel,
+				.biBitCount = 24,
 				.biCompression = BI_RGB
 			} };
-		Eigen::Matrix<uint8_t, Eigen::Dynamic, 1>像素数组(位图.bmWidthBytes * 位图.bmHeight);
-		GetDIBits(内存设备上下文, 位图句柄, 0, 位图.bmHeight, 像素数组.data(), &位图信息, DIB_RGB_COLORS);
-#ifdef _DEBUG
-		uint8_t* WEBP;
-		static uint16_t 编号 = 0;
-		std::ofstream("D:\\过曝监视器\\" + std::to_string(编号++) + ".webp", std::ios::binary).write(reinterpret_cast<char*>(WEBP), WebPEncodeLosslessRGB(像素数组.data(), 位图.bmWidth, 位图.bmHeight, 位图.bmWidthBytes, &WEBP));
-		WebPFree(WEBP);
-#endif
+		Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>像素数组(窗口高度, (窗口宽度 * 3 + 3) & ~0b11);//4字节对齐
+		GetDIBits(内存设备上下文, 位图句柄, 0, 窗口高度, 像素数组.data(), &位图信息, DIB_RGB_COLORS);
 		DeleteDC(内存设备上下文);
 		DeleteObject(位图句柄);
+		像素数组(Eigen::placeholders::all
 		uint16_t const 当前亮度 = 像素数组.cast<uint32_t>().mean();
 		static std::string const 当前亮度提示 = 转当前代码页(L"当前亮度：");
 		std::cout << 输出当前时间() << 当前亮度提示 << 当前亮度 << std::endl;
