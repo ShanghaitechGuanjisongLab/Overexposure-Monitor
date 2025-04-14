@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
 			错误信息流 << '[' << a << "]";
 			普通报错(错误信息流.str());
 		}
-	for (uint16_t a = 7; a < 10; ++a)
+	for (uint16_t a = 7; a < 11; ++a)
 	{
 		if (!(指针窗口 = FindWindowExW(父窗口A, 指针窗口, L"SWT_Window0", NULL)))
 		{
@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
 		父窗口A = 子窗口;
 		goto 找到正确分支;
 	}
-	错误信息流 << "：找不到正确分支";
+	错误信息流 << 转当前代码页(L"：找不到正确分支");
 	普通报错(错误信息流.str());
 找到正确分支:
 	try
