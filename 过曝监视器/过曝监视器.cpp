@@ -1,5 +1,4 @@
 ﻿#include <Eigen/Core>
-#include <webp/encode.h>
 #include <windows.h>
 #include <wininet.h>
 #pragma comment(lib,"Wininet.lib")
