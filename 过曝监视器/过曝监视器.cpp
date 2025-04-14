@@ -232,8 +232,7 @@ int main(int argc, char* argv[])
 		GetDIBits(内存设备上下文, 位图句柄, 0, 窗口高度, 像素数组.data(), &位图信息, DIB_RGB_COLORS);
 		DeleteDC(内存设备上下文);
 		DeleteObject(位图句柄);
-		像素数组(Eigen::placeholders::all
-		uint16_t const 当前亮度 = 像素数组.cast<uint32_t>().mean();
+		uint16_t const 当前亮度 = 像素数组(Eigen::placeholders::all, Eigen::seqN(0, 窗口宽度 * 3)).cast<uint32_t>().mean();
 		static std::string const 当前亮度提示 = 转当前代码页(L"当前亮度：");
 		std::cout << 输出当前时间() << 当前亮度提示 << 当前亮度 << std::endl;
 		if (当前亮度 > 警报阈值)
